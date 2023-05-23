@@ -1,13 +1,26 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 
+# Create your models here.
 class User(AbstractUser):
     ROLE_CHOICES = (
         ('client', 'Client'),
         ('artisan', 'Artisan'),
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='client')
+
     # Add any additional fields or customization to the User model here
+
+    # Add related_name to the groups field
+    groups = models.ManyToManyField(Group, related_name='custom_user_set')
+
+    # Add related_name to the user_permissions field
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='custom_user_set',
+        verbose_name='user permissions',
+        blank=True,
+    )
 
     def __str__(self):
         return self.username
