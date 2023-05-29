@@ -18,7 +18,7 @@ To run the ArtiSANs project locally, follow these steps:
 
 1. Clone the repository:
    
-   git clone https://github.com/your-username/artisans.git
+   git clone https://github.com/abrokinla/ArtiSANs.git
 
 2. Set up the backend:
 
