@@ -23,28 +23,30 @@ To run the ArtiSANs project locally, follow these steps:
 2. Set up the backend:
 
 - Navigate to the backend directory:
-
-    cd artisans/backend
+```
+    cd artisans/backend```
 
 - Create a virtual environment: 
-
-    python -m venv venv
+```
+    python -m venv venv```
 
 - Activate the virtual environment:
-
-    source venv/bin/activate
+```
+    source venv/bin/activate```
 
 - Install the required dependencies:
-
-    pip install -r requirements.txt
+```
+    pip install -r requirements.txt```
 
 - Apply migrations:
-
+``` python
     python manage.py migrate
-
+    ```
 - Start the Django development server:
-
+``` 
+    python
     python manage.py runserver
+    ```
 
 The backend server should now be running at http://localhost:8000.
 
