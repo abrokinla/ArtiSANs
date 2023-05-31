@@ -48,6 +48,11 @@ class Artisan(models.Model):
     categories = models.ManyToManyField(Category)
 
     # Add artisan-specific fields and methods
+    bio = models.TextField(default='')
+    experience = models.TextField(default='')
+    location = models.TextField(default='')
+    whatsapp = models.CharField(max_length=20, default=None, null=True, blank=True)
+    tel = models.CharField(max_length=20, default=None, null=True, blank=True)
 
     def __str__(self):
         return self.user.username
