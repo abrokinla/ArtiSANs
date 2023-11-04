@@ -16,13 +16,13 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
 
-        fields = ['__all__']
+        fields = ['user', 'phone_number', 'location', 'profile_picture_url', 'bio']
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
 
-        fields = ['__all__']
+        fields = ['name', 'description']
 
 class ArtisansSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -30,12 +30,12 @@ class ArtisansSerializer(serializers.ModelSerializer):
     class Meta:
         model = Artisan
 
-        fields = ['__all__']
+        fields = ['user', 'categories', 'bio', 'experience', 'location', 'whatsapp', 'tel']
 
 class JobRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobRequest
 
-        fields = ['__all__']
+        fields = ['client', 'artisan', 'title', 'description', 'status']
 
     

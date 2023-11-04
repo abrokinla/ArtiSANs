@@ -4,9 +4,7 @@ from rest_framework.exceptions import NotFound
 from api.serializers import UserSerializer, ArtisansSerializer
 from Artisans.models import Artisan
 
-class ArtisanView(
-    generics.CreateAPIView,
-    generics.ListAPIView):
+class CreateArtisanView(generics.CreateAPIView):
 
     queryset = Artisan.objects.all()
     serializer_class = ArtisansSerializer
@@ -17,28 +15,34 @@ class ArtisanView(
             user_data = artisan_data.pop('user')
 
             user_serializer = UserSerializer(data=user_data)
-            artisan_serializer = self.get(data=artisan_data)
+            artisan_serializer = ArtisansSerializer(data=artisan_data)
 
             user_serializer.is_valid(raise_exception=True)
             artisan_serializer.is_valid(raise_exception=True)
 
-            user = user_serializer,save()
+            user = user_serializer.save()
             artisan_data['user'] = user.id
             artisan_serializer.save(user=user)
 
             return Response({
                 'success':True,
-                'data': artisan.data
+                'data': artisan_serializer.data
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
 
             return Response({
-                'success': True,
+                'success': False,
                 'message': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
 
+class ListArtisanApiView(generics.ListAPIView):
+    queryset = Artisan.objects.all()
+    serializer_class = ArtisansSerializer
+
     def list(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            return None
         queryset = self.filter_queryset(self.get_queryset())
 
         if not queryset.exists():
@@ -78,7 +82,7 @@ class ArtisanRetrieveUpdateDestroyView(
         if artisan_serializer.is_valid(raise_exception=True):
             artisan_serializer.save()
 
-            user_data = requsts.data.get('user')
+            user_data = request.data.get('user')
             if user_data:
                 user = instance.user
                 user_serializer = UserSerializer(instance=user_data, partial=True)
@@ -86,7 +90,7 @@ class ArtisanRetrieveUpdateDestroyView(
                 if user_serializer.is_valid(raise_exception=True):
                     user_serializer.save()
 
-            return REsponse({
+            return Response({
                 'success': True,
                 'data': artisan_serializer.data
             }, status=status.HTTP_200_OK)

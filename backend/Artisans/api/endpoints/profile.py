@@ -4,9 +4,7 @@ from rest_framework.exceptions import NotFound
 from api.serializers import UserSerializer, ProfileSerializer
 from Artisans.models import Profile
 
-class ProfileView(
-    generics.CreateAPIView,
-    generics.ListAPIView):
+class CreateProfileView(generics.CreateAPIView):
 
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
@@ -17,26 +15,31 @@ class ProfileView(
             user_data = profile_data.pop('user')
 
             user_serializer = UserSerializer(data=user_data)
-            profile_serializer = self.get(data=profile_data)
+            profile_serializer = ProfileSerializer(data=profile_data)
 
             user_serializer.is_valid(raise_exception=True)
             profile_serializer.is_valid(raise_exception=True)
 
-            user = user_serializer,save()
+            user = user_serializer.save()
             profile_data['user'] = user.id
             profile_serializer.save(user=user)
 
             return Response({
                 'success':True,
-                'data': profile.data
+                'data': profile_serializer.data
             }, status=status.HTTP_201_CREATED)
 
         except Exception as e:
 
             return Response({
-                'success': True,
+                'success': False,
                 'message': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
+
+class ListProfileApiView(generics.ListAPIView):
+
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -75,10 +78,10 @@ class ProfileRetrieveUpdateDestroyView(
 
         profile_serializer = self.get_serializer(instance, data=request.data, partial=True)
 
-        if profile.is_valid(raise_exception=True):
+        if profile_serializer.is_valid(raise_exception=True):
             profile_serializer.save()
 
-            user_data = requsts.data.get('user')
+            user_data = request.data.get('user')
             if user_data:
                 user = instance.user
                 user_serializer = UserSerializer(instance=user_data, partial=True)
@@ -86,7 +89,7 @@ class ProfileRetrieveUpdateDestroyView(
                 if user_serializer.is_valid(raise_exception=True):
                     user_serializer.save()
 
-            return REsponse({
+            return Response({
                 'success': True,
                 'data': profile_serializer.data
             }, status=status.HTTP_200_OK)
