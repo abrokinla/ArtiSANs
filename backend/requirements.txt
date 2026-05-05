@@ -5,6 +5,7 @@ python-dotenv==1.0.0
 django-cors-headers==4.3.1
 gunicorn==21.2.0
 whitenoise==6.6.0
+setuptools>=68.0.0
 # For future PostgreSQL upgrade (optional, SQLite used for MVP):
 # psycopg2-binary==2.9.9
 # For Redis/Celery (skipped for MVP to save cost):
