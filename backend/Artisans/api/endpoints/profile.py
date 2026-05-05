@@ -1,139 +1,123 @@
-from rest_framework import generics, status
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
-from api.serializers import UserSerializer, ProfileSerializer
-from Artisans.models import Profile
+from rest_framework.permissions import IsAuthenticated
+from Artisans.models import Profile, User, Transaction
+from api.serializers import ProfileSerializer, UserSerializer, TransactionSerializer
+from django.shortcuts import get_object_or_404
+import uuid
 
-class CreateProfileView(generics.CreateAPIView):
-
+class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-
-    def create(self, request, *args, **kwargs):
-        try:
-            profile_data = request.data.copy()
-            user_data = profile_data.pop('user')
-
-            user_serializer = UserSerializer(data=user_data)
-            profile_serializer = ProfileSerializer(data=profile_data)
-
-            user_serializer.is_valid(raise_exception=True)
-            profile_serializer.is_valid(raise_exception=True)
-
-            user = user_serializer.save()
-            profile_data['user'] = user.id
-            profile_serializer.save(user=user)
-
-            return Response({
-                'success':True,
-                'data': profile_serializer.data
-            }, status=status.HTTP_201_CREATED)
-
-        except Exception as e:
-
-            return Response({
-                'success': False,
-                'message': str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-class ListProfileApiView(generics.ListAPIView):
-
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        if not queryset.exists():
-            return response({
-                'success': False,
-                'message': 'No records found'
-            }, status=status.HTTP_404_NOT_FOUND)
-
-        profile_serializer = self.get_serializer(queryset, many=True)
-
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            return Profile.objects.all()
+        return Profile.objects.filter(user=self.request.user)
+    
+    @action(detail=False, methods=['get', 'put', 'patch'])
+    def me(self, request):
+        """Get or update current user's profile"""
+        profile = get_object_or_404(Profile, user=request.user)
+        
+        if request.method in ['PUT', 'PATCH']:
+            serializer = self.get_serializer(profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'])
+    def upgrade_subscription(self, request):
+        """Upgrade subscription tier (MVP - mock payment)"""
+        tier = request.data.get('tier')
+        if tier not in ['basic', 'pro', 'premium']:
+            return Response({'error': 'Invalid tier'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        profile = request.user.profile
+        profile.subscription_tier = tier
+        
+        # Mock payment - in production, integrate Paystack/Flutterwave
+        if tier == 'pro':
+            profile.subscription_expires = timezone.now() + timezone.timedelta(days=30)
+            profile.bids_remaining = 15
+        elif tier == 'premium':
+            profile.subscription_expires = timezone.now() + timezone.timedelta(days=30)
+            profile.bids_remaining = 999  # Unlimited
+        
+        profile.save()
+        
+        # Record transaction (mock)
+        Transaction.objects.create(
+            user=request.user,
+            transaction_type='subscription',
+            amount=5000.00 if tier == 'pro' else 15000.00,
+            reference=f"sub_{uuid.uuid4().hex[:8]}",
+            status='success'
+        )
+        
         return Response({
-            'success': True,
-            'data': profile_serializer.data
-        }, status=status.HTTP_200_OK)
-
-
-class ProfileRetrieveUpdateDestroyView(
-    generics.RetrieveAPIView,
-    generics.UpdateAPIView,
-    generics.DestroyAPIView):
-
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-    lookup_field = 'pk'
-
-    def patch(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-        except NotFound:
-            return Response({
-                'success': False,
-                'message': 'No record found'
-            }, status=status.HTTP_404_NOT_FOUND)
-
-        profile_serializer = self.get_serializer(instance, data=request.data, partial=True)
-
-        if profile_serializer.is_valid(raise_exception=True):
-            profile_serializer.save()
-
-            user_data = request.data.get('user')
-            if user_data:
-                user = instance.user
-                user_serializer = UserSerializer(instance=user_data, partial=True)
-
-                if user_serializer.is_valid(raise_exception=True):
-                    user_serializer.save()
-
-            return Response({
-                'success': True,
-                'data': profile_serializer.data
-            }, status=status.HTTP_200_OK)
-
-        return Response({
-            'success': False,
-            'data': profile_serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
-
-    def destroy(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-        except NotFound:
-            return Response({
-                'success': False,
-                'message': 'Record not Found'
-            }, status=status.HTTP_404_NOT_FOUND)
-
-        self.perform_destroy(instance)
-
-        return Response({
-            'success': True,
-            'message': 'Record Deleted!'
-        }, status=status.HTTP_200_OK)
-
-    def retrieve(self, request, *args, **kwargs):
-        try:
-            instance = self.get_object()
-        except NotFound:
-
-            return Response({
-                'success': False,
-                'message': 'Record not Found!'
-            }, status=status.HTTP_404_NOT_FOUND)
-
-        profile_serializer = self.get_serializer(instance)
-        user_serializer = UserSerializer(instance=instance.user)
-
-        return Response({
-            'success': True,
-            'data':{
-                'artisan': profile_serializer.data,
-                'user': user_serializer.data
+            'message': f'Upgraded to {tier} tier',
+            'profile': ProfileSerializer(profile).data
+        })
+    
+    @action(detail=False, methods=['get'])
+    def transactions(self, request):
+        """Get current user's transaction history"""
+        transactions = Transaction.objects.filter(user=request.user)
+        serializer = TransactionSerializer(transactions, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'])
+    def verify_identity(self, request):
+        """Submit ID verification documents (mock for MVP)"""
+        profile = request.user.profile
+        verification_type = request.data.get('type')  # 'nin' or 'bvn'
+        
+        if verification_type == 'nin':
+            request.user.nin_verified = True
+            request.user.save()
+        elif verification_type == 'bvn':
+            request.user.bvn_verified = True
+            request.user.save()
+        else:
+            return Response({'error': 'Invalid verification type'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({'message': f'{verification_type.upper()} verification submitted'})
+    
+    @action(detail=False, methods=['get'])
+    def usage_stats(self, request):
+        """Get usage statistics for current user"""
+        user = request.user
+        stats = {}
+        
+        if user.role == 'artisan':
+            from Artisans.models import Artisan, JobRequest, Bid
+            try:
+                artisan = Artisan.objects.get(user=user)
+                stats = {
+                    'total_jobs': JobRequest.objects.filter(artisan=artisan).count(),
+                    'completed_jobs': JobRequest.objects.filter(artisan=artisan, status='completed').count(),
+                    'total_bids': Bid.objects.filter(artisan=artisan).count(),
+                    'bids_remaining': user.profile.bids_remaining,
+                    'subscription_tier': user.profile.subscription_tier,
+                    'total_earnings': str(artisan.total_earnings),
+                    'pending_earnings': str(artisan.pending_earnings),
+                }
+            except Artisan.DoesNotExist:
+                stats = {'error': 'Artisan profile not found'}
+        
+        elif user.role == 'client':
+            from Artisans.models import JobRequest
+            stats = {
+                'total_jobs_posted': JobRequest.objects.filter(client=user).count(),
+                'active_jobs': JobRequest.objects.filter(client=user, status__in=['assigned', 'in_progress']).count(),
+                'completed_jobs': JobRequest.objects.filter(client=user, status='completed').count(),
             }
-        }, status=status.HTTP_200_OK)
-
-
+        
+        return Response(stats)
