@@ -15,13 +15,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <head>
+        {/* DM Sans - Airbnb Cereal VF substitute */}
+        <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />
+      </head>
+      <body className="font-sans">
         <AuthProvider>
           <Navbar />
           <main>{children}</main>
-          <footer className="bg-gray-800 text-white py-8 mt-12">
+          <footer className="bg-white border-t border-gray-100 py-12 mt-16">
             <div className="container mx-auto px-4 text-center">
-              <p>&copy; 2026 ArtiSANs NG. All rights reserved.</p>
+              <p className="text-secondary text-sm">&copy; 2026 ArtiSANs NG. All rights reserved.</p>
             </div>
           </footer>
         </AuthProvider>

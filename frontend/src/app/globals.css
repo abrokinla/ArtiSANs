@@ -2,20 +2,487 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   ArtiSANs - Airbnb Design System
+   Inspired by Airbnb's warm, photography-forward marketplace aesthetic
+   ============================================ */
+
+/* CSS Custom Properties - Airbnb Design Tokens */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand Colors */
+  --color-rausch: #ff385c;        /* Primary CTA, brand accent */
+  --color-rausch-deep: #e00b41;   /* Pressed/dark variant */
+  --color-luxe-purple: #460479;   /* Premium tier */
+  --color-plus-magenta: #92174d;  /* Plus tier */
+
+  /* Text Colors */
+  --color-text-primary: #222222;   /* Near black - warm, not cold */
+  --color-text-focused: #3f3f3f;   /* Focused state */
+  --color-text-secondary: #6a6a6a; /* Secondary text, descriptions */
+  --color-text-disabled: rgba(0, 0, 0, 0.24);
+  --color-text-link-disabled: #929292;
+  --color-text-error: #c13515;
+  --color-text-legal: #428bff;     /* Legal links */
+
+  /* Surface Colors */
+  --color-bg-primary: #ffffff;     /* Pure white background */
+  --color-bg-secondary: #f2f2f2;   /* Light surface, circular nav */
+  --color-bg-tertiary: #f7f7f7;    /* Subtle section backgrounds */
+
+  /* Border & Divider */
+  --color-border: #c1c1c1;
+  --color-border-light: rgba(0, 0, 0, 0.08);
+
+  /* Shadows - Three-layer system (Airbnb signature) */
+  --shadow-card: rgba(0, 0, 0, 0.02) 0px 0px 0px 1px,
+                 rgba(0, 0, 0, 0.04) 0px 2px 6px,
+                 rgba(0, 0, 0, 0.1) 0px 4px 8px;
+  --shadow-hover: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+  --shadow-button: rgba(0, 0, 0, 0.12) 0px 2px 4px;
+
+  /* Border Radius Scale */
+  --radius-sm: 8px;    /* Buttons, tabs */
+  --radius-md: 14px;   /* Badges, labels */
+  --radius-lg: 20px;   /* Cards */
+  --radius-xl: 32px;   /* Large elements */
+  --radius-full: 50%;  /* Circular controls, avatars */
+
+  /* Typography */
+  --font-primary: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Base Typography */
+body {
+  font-family: var(--font-primary);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Typography Classes
+   ============================================ */
+
+.text-display {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.43;
+  letter-spacing: normal;
+}
+
+.text-heading {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.44px;
+}
+
+.text-subheading {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.43;
+}
+
+.text-feature {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.20;
+  letter-spacing: -0.18px;
+}
+
+.text-ui-medium {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.text-ui-semibold {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.text-body {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+}
+
+.text-body-medium {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.29;
+}
+
+.text-caption {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.23;
+}
+
+.text-tag {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.33;
+}
+
+.text-badge {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.18;
+}
+
+.text-micro {
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.32px;
+  text-transform: uppercase;
+}
+
+/* ============================================
+   Component Classes
+   ============================================ */
+
+/* Buttons */
+.btn-primary {
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  padding: 0px 24px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 48px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  background: var(--color-rausch);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-rausch {
+  background: var(--color-rausch);
+  color: var(--color-bg-primary);
+  padding: 0px 24px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 48px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-rausch:hover {
+  background: var(--color-rausch-deep);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-secondary {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  padding: 0px 24px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 48px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-text-primary);
+  padding: 0px 24px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 48px;
+  border: 2px solid var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background: var(--color-text-primary);
+  color: var(--color-bg-primary);
+}
+
+/* Circular Navigation Button */
+.btn-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-circle:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateX(2px);
+}
+
+/* Cards */
+.card {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.card-image {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.card-body {
+  padding: var(--space-lg);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.card-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+  color: var(--color-text-secondary);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.33;
+}
+
+.badge-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-info {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.badge-warning {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+/* Inputs */
+.input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-size: 14px;
+  font-family: var(--font-primary);
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-text-primary);
+  box-shadow: 0 0 0 2px rgba(34, 34, 34, 0.1);
+}
+
+.input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+/* Search Bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-sm) var(--space-md);
+  gap: var(--space-sm);
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  font-family: var(--font-primary);
+  color: var(--color-text-primary);
+  background: transparent;
+}
+
+.search-bar button {
+  background: var(--color-rausch);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.search-bar button:hover {
+  background: var(--color-rausch-deep);
+}
+
+/* Navigation */
+.navbar {
+  background: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border-light);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Section */
+.section {
+  padding: var(--space-3xl) 0;
+}
+
+.section-title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.43;
+  color: var(--color-text-primary);
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+/* Container */
+.container-custom {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+/* Grid */
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-lg);
+}
+
+/* Rating Stars */
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-primary);
+}
+
+.rating-star {
+  color: #ff385c; /* Using rausch for stars */
+}
+
+/* Link */
+.link {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: var(--color-rausch);
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+.text-rausch { color: var(--color-rausch); }
+.text-secondary { color: var(--color-text-secondary); }
+.bg-rausch { background-color: var(--color-rausch); }
+.bg-secondary { background-color: var(--color-bg-secondary); }
+
+/* ============================================
+   Responsive Breakpoints (matching Airbnb)
+   ============================================ */
+
+/* Mobile Small: <375px */
+/* Mobile: 375-550px */
+/* Tablet Small: 550-744px */
+/* Tablet: 744-950px */
+/* Desktop Small: 950-1128px */
+/* Desktop: 1128-1440px */
+/* Large Desktop: 1440-1920px */
+/* Ultra-wide: >1920px */
+
+@media (min-width: 744px) {
+  .grid-cards {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (min-width: 1128px) {
+  .grid-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1440px) {
+  .grid-cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
