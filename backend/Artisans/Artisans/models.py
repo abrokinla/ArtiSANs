@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 
 class User(AbstractUser):
-    app_label = 'Artisans'
     ROLE_CHOICES = (
         ('client', 'Client'),
         ('artisan', 'Artisan'),
