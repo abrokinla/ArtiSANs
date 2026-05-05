@@ -3,6 +3,7 @@ services:
     name: artisans-backend
     env: python
     plan: starter
+    runtime: python-3.12.0
     buildCommand: |
       pip install -r requirements.txt
       python Artisans/manage.py migrate
