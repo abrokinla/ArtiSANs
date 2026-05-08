@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    'Artisans',
+    "Artisans.apps.ArtisansConfig",
 ]
 
 AUTH_USER_MODEL = 'Artisans.User'
