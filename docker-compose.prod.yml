@@ -2,17 +2,17 @@ version: '3.8'
 services:
   web:
     build:
-      context: ./backend
+      context: ./services/backend
       dockerfile: Dockerfile
     restart: always
     env_file:
-      - ./backend/Artisans/.env
+      - ./services/backend/Artisans/.env
     ports:
       - "8000:8000"
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
-      - ./backend/Artisans/db.sqlite3:/app/Artisans/db.sqlite3
+      - ./services/backend/Artisans/db.sqlite3:/app/Artisans/db.sqlite3
     environment:
       - DEBUG=False
     healthcheck:

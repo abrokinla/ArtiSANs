@@ -24,7 +24,8 @@ To run the ArtiSANs project locally, follow these steps:
 
 - Navigate to the backend directory:
 ```
-    cd artisans/backend```
+    cd services/backend
+```
 
 - Create a virtual environment: 
 ```
@@ -37,6 +38,16 @@ To run the ArtiSANs project locally, follow these steps:
 - Install the required dependencies:
 ```
     pip install -r requirements.txt```
+
+Project layout (restructured):
+
+- `services/frontend` — Next.js frontend (deploy separately)
+- `services/backend` — Django backend (deploy separately, Docker assets in `services/backend`)
+
+You can run the backend production container with:
+```bash
+docker compose -f docker-compose.prod.yml up --build -d
+```
 
 - Apply migrations:
 ``` python
