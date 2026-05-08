@@ -1,1 +1,1 @@
-web: python Artisans/manage.py migrate && python Artisans/manage.py collectstatic --noinput && gunicorn Artisans.wsgi:application
+web: python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --chdir Artisans Artisans.wsgi:application
