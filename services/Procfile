@@ -1,0 +1,1 @@
+web: cd backend/Artisans && python manage.py migrate && python manage.py collectstatic --noinput && gunicorn Artisans.wsgi:application
