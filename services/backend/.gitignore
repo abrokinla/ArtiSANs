@@ -33,3 +33,4 @@ db.sqlite3.backup*
 # OS
 .DS_Store
 Thumbs.db
+hermes_conversation_20260512_130513.json
