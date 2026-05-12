@@ -65,6 +65,8 @@ MIDDLEWARE = [
 CSRF_TRUSTED_ORIGINS = [
     'https://artisans-ng.abrokinla.workers.dev',
     'http://localhost:3000',
+    'https://artisans-ojzr.onrender.com',
+    'http://localhost:127.0.0.1'
 ]
 
 ROOT_URLCONF = 'Artisans.urls'
