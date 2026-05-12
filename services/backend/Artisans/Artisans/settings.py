@@ -11,16 +11,14 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-
-from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env from project root (ArtiSANs/.env)
+load_dotenv(os.path.join(BASE_DIR.parent.parent.parent, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -87,13 +85,48 @@ WSGI_APPLICATION = 'Artisans.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+# Supports both SQLite (local dev) and PostgreSQL (production)
+# Set DATABASE_URL for PostgreSQL: postgresql://user:pass@host:port/dbname
+# Or set individual DATABASE_ENGINE, DATABASE_NAME, etc. for SQLite
 
-DATABASES = {
-    'default': {
-        'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': os.environ.get('DATABASE_NAME', BASE_DIR / 'db.sqlite3'),
+import re
+
+DATABASE_URL = os.environ.get('DATABASE_URL') or os.environ.get('DATABASEURL')
+
+if DATABASE_URL:
+    # Parse PostgreSQL connection string
+    # Format: postgresql://user:password@host:port/dbname
+    url_match = re.match(
+        r'postgresql://(?P<user>[^:]+)(:(?P<password>[^@]+))?@(?P<host>[^:]+):(?P<port>\d+)/(?P<name>.+)',
+        DATABASE_URL
+    )
+    if url_match:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': url_match.group('name'),
+                'USER': url_match.group('user'),
+                'PASSWORD': url_match.group('password') or '',
+                'HOST': url_match.group('host'),
+                'PORT': url_match.group('port'),
+            }
+        }
+    else:
+        # Fallback to SQLite if URL parsing fails
+        DATABASES = {
+            'default': {
+                'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.sqlite3'),
+                'NAME': os.environ.get('DATABASE_NAME', BASE_DIR / 'db.sqlite3'),
+            }
+        }
+else:
+    # Legacy SQLite configuration
+    DATABASES = {
+        'default': {
+            'ENGINE': os.environ.get('DATABASE_ENGINE', 'django.db.backends.sqlite3'),
+            'NAME': os.environ.get('DATABASE_NAME', BASE_DIR / 'db.sqlite3'),
+        }
     }
-}
 
 
 # Password validation
