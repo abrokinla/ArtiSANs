@@ -145,6 +145,9 @@ class JobRequest(models.Model):
     lead_fee_paid = models.BooleanField(default=False)
     lead_fee_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
+    # Job images (uploaded to Cloudinary)
+    images = models.JSONField(default=list, blank=True)  # List of {url, public_id} objects
+
     def __str__(self):
         return self.title
     

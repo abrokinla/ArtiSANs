@@ -7,6 +7,7 @@ from api.serializers import JobRequestSerializer, BidSerializer
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 import uuid
+import cloudinary.uploader
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = JobRequest.objects.all()
@@ -33,7 +34,54 @@ class JobViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
-    
+
+    @action(detail=False, methods=['post'], url_path='upload_image')
+    def upload_job_image(self, request):
+        """Upload a job image to Cloudinary and return the URL"""
+        if 'image' not in request.FILES:
+            return Response({'error': 'No image file provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        image_file = request.FILES['image']
+
+        # Validate file type
+        allowed_types = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+        if image_file.content_type not in allowed_types:
+            return Response(
+                {'error': f'Invalid file type: {image_file.content_type}. Allowed: JPEG, PNG, WebP, GIF'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate file size (max 5MB)
+        if image_file.size > 5 * 1024 * 1024:
+            return Response(
+                {'error': 'File too large. Maximum size is 5MB'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            upload_result = cloudinary.uploader.upload(
+                image_file,
+                folder='artisans/job_images',
+                overwrite=True,
+                resource_type='image',
+                transformation=[
+                    {'width': 1200, 'height': 1200, 'crop': 'limit'},
+                    {'quality': 'auto:good'},
+                    {'fetch_format': 'auto'}
+                ]
+            )
+
+            return Response({
+                'url': upload_result['secure_url'],
+                'public_id': upload_result['public_id'],
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Upload failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
     @action(detail=True, methods=['post'])
     def open_bidding(self, request, pk=None):
         """Open job for bidding"""

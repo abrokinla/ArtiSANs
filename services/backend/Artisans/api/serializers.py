@@ -38,6 +38,9 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
+    role = serializers.CharField(source='user.role', read_only=True)
     
     class Meta:
         model = Profile
@@ -113,12 +116,13 @@ class JobRequestSerializer(serializers.ModelSerializer):
     artisan_username = serializers.CharField(source='artisan.user.username', read_only=True, allow_null=True)
     category_name = serializers.CharField(source='category.name', read_only=True, allow_null=True)
     bids_count = serializers.SerializerMethodField()
-    
+    images = serializers.JSONField(required=False, default=list)
+
     class Meta:
         model = JobRequest
         fields = '__all__'
         read_only_fields = ('client', 'status', 'created_at', 'updated_at')
-    
+
     def get_bids_count(self, obj):
         return obj.bids.count()
 
