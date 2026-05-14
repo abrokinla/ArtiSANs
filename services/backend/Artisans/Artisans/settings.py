@@ -98,29 +98,26 @@ WSGI_APPLICATION = 'Artisans.wsgi.application'
 # Set DATABASE_URL for PostgreSQL: postgresql://user:pass@host:port/dbname
 # Or set individual DATABASE_ENGINE, DATABASE_NAME, etc. for SQLite
 
-import re
+from urllib.parse import urlparse
 
 DATABASE_URL = os.environ.get('DATABASE_URL') or os.environ.get('DATABASEURL')
 
 if DATABASE_URL:
-    # Parse PostgreSQL connection string
+    # Parse PostgreSQL connection string using urllib (handles special chars in passwords)
     # Format: postgresql://user:password@host:port/dbname
-    url_match = re.match(
-        r'postgresql://(?P<user>[^:]+)(:(?P<password>[^@]+))?@(?P<host>[^:]+):(?P<port>\d+)/(?P<name>.+)',
-        DATABASE_URL
-    )
-    if url_match:
+    try:
+        parsed = urlparse(DATABASE_URL)
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
-                'NAME': url_match.group('name'),
-                'USER': url_match.group('user'),
-                'PASSWORD': url_match.group('password') or '',
-                'HOST': url_match.group('host'),
-                'PORT': url_match.group('port'),
+                'NAME': parsed.path.lstrip('/'),
+                'USER': parsed.username or '',
+                'PASSWORD': parsed.password or '',
+                'HOST': parsed.hostname or '',
+                'PORT': str(parsed.port) if parsed.port else '5432',
             }
         }
-    else:
+    except Exception:
         # Fallback to SQLite if URL parsing fails
         DATABASES = {
             'default': {
