@@ -18,7 +18,9 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load .env from project root (ArtiSANs/.env)
-load_dotenv(os.path.join(BASE_DIR.parent.parent.parent, '.env'))
+load_dotenv(os.path.join(BASE_DIR.parent.parent.parent.parent, '.env'))
+# Load local .env (ArtiSANs/services/backend/Artisans/.env) — overrides for local dev
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
